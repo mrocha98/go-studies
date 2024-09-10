@@ -1,6 +1,5 @@
-# EditorConfig is awesome: https://EditorConfig.org
+# editorconfig.org
 
-# top-most EditorConfig file
 root = true
 
 [*]
@@ -11,8 +10,16 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.txt]
+[*.{csv,txt}]
 insert_final_newline = false
 
-[*.csv]
-insert_final_newline = false
+[*.{md,mdx}]
+# Two trailing spaces => newline in GitHub-flavored markdown
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+indent_style = space
+
+[*.sql]
+indent_size = 2
