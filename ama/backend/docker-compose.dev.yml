@@ -1,0 +1,65 @@
+services:
+  api:
+    container_name: ama-go
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    tmpfs:
+      - /app/tmp:exec,mode=777
+    ports:
+      - ${AMA_BACKEND_API_PORT:-8080}:8080
+    networks:
+      - ama
+    logging:
+      driver: local
+
+  db:
+    container_name: ama-postgresql
+    image: bitnami/postgresql:14.13.0
+    ports:
+      - ${AMA_BACKEND_DATABASE_PORT:-5432}:5432
+    environment:
+      POSTGRESQL_USERNAME: ${AMA_BACKEND_DATABASE_USER}
+      POSTGRESQL_PASSWORD: ${AMA_BACKEND_DATABASE_PASSWORD}
+      POSTGRESQL_DATABASE: ${AMA_BACKEND_DATABASE_NAME}
+    env_file:
+      - .env
+    volumes:
+      - db:/bitnami/postgresql
+    networks:
+      - ama
+    logging:
+      driver: none
+
+  pgadmin:
+    container_name: ama-pgadmin
+    image: dpage/pgadmin4:2024-08-20-2
+    depends_on:
+      - db
+    ports:
+      - 8081:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@email.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    networks:
+      - ama
+    logging:
+      driver: none
+
+volumes:
+  db:
+    driver: local
+  pgadmin:
+    driver: local
+
+networks:
+  ama:
+    driver: bridge

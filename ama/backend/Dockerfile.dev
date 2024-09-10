@@ -1,0 +1,17 @@
+FROM golang:1.23.1-bookworm AS build
+RUN go install github.com/air-verse/air@latest
+RUN go install github.com/jackc/tern/v2@latest
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+FROM golang:1.23.1-bookworm AS runner
+COPY --from=build /go/bin/air /usr/local/bin/air
+COPY --from=build /go/bin/tern /usr/local/bin/tern
+COPY --from=build /go/bin/sqlc /usr/local/bin/sqlc
+WORKDIR /app
+COPY --from=build /app .
+EXPOSE 8080
+CMD ["air"]
