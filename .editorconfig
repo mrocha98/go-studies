@@ -23,3 +23,7 @@ indent_style = space
 
 [*.sql]
 indent_size = 2
+
+[*.{js,ts,json,vue}]
+indent_size = 2
+indent_style = space
