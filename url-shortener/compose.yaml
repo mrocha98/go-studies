@@ -1,0 +1,14 @@
+services:
+  api:
+    build:
+      context: .
+      target: final
+    container_name: go-url-shortener-api
+    ports:
+      - 8008:8008
+    networks:
+      - url-shortener-network
+
+networks:
+  url-shortener-network:
+    driver: bridge
