@@ -1,0 +1,16 @@
+services:
+  api:
+    build:
+      context: .
+      target: final
+    container_name: omdb-api
+    ports:
+      - 8008:8008
+    networks:
+      - omdb-api-network
+    env_file:
+      - .env
+
+networks:
+  omdb-api-network:
+    driver: bridge
