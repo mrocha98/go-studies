@@ -3,12 +3,30 @@ services:
     build:
       context: .
       target: final
-    container_name: go-url-shortener-api
+    container_name: api
     ports:
       - 8008:8008
     networks:
       - url-shortener-network
+    depends_on:
+      - cache
+
+  cache:
+    image: valkey/valkey:8.0.1-alpine
+    container_name: cache
+    environment:
+      VALKEY_EXTRA_FLAGS: --save 20 1 --loglevel notice --requirepass 9a1c6fbde8614645b543ef703153f295
+    ports:
+      - 6379:6379
+    networks:
+      - url-shortener-network
+    volumes:
+      - valkey-data:/data
 
 networks:
   url-shortener-network:
     driver: bridge
+
+volumes:
+  valkey-data:
+    driver: local

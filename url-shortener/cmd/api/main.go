@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/mrocha98/go-studies/url-shortener/internal/api"
+	"github.com/mrocha98/go-studies/url-shortener/internal/store"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -18,8 +20,15 @@ func main() {
 }
 
 func run() error {
-	db := make(map[string]string)
-	handler := api.NewHandler(db)
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "cache:6379",
+		Password: "9a1c6fbde8614645b543ef703153f295",
+		DB:       0,
+	})
+
+	store := store.NewStore(rdb)
+
+	handler := api.NewHandler(store)
 
 	s := http.Server{
 		Addr:         "0.0.0.0:8008",

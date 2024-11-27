@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/mrocha98/go-studies/url-shortener/internal/store"
 )
 
 type response struct {
@@ -28,7 +29,7 @@ func makeResponseWithError(error string) response {
 	}
 }
 
-func NewHandler(db map[string]string) http.Handler {
+func NewHandler(store store.Store) http.Handler {
 	r := chi.NewMux()
 
 	r.Use(
@@ -40,8 +41,8 @@ func NewHandler(db map[string]string) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/url", func(r chi.Router) {
-			r.Post("/shorten", handleShortenUrl(db))
-			r.Get("/{code}", handleGetShortenedUrl(db))
+			r.Post("/shorten", handleShortenUrl(store))
+			r.Get("/{code}", handleGetShortenedUrl(store))
 		})
 	})
 

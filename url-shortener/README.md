@@ -39,3 +39,10 @@ Resulting in:
    "date" : "2024-11-18T00:18:07.965635045Z"
 }
 ```
+
+If you want to redirect to the url you can pass the query param `redirect=1` or `redirect=true`
+
+```sh
+# in your browser
+http://localhost:8008/api/url/lBYEK5Cz?redirect=1
+```
