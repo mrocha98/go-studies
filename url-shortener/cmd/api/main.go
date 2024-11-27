@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mrocha98/go-studies/url-shortener/api"
+	"github.com/mrocha98/go-studies/url-shortener/internal/api"
 )
 
 func main() {

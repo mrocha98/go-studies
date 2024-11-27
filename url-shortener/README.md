@@ -4,7 +4,7 @@ A simple URL Shortener built with go.
 
 ## Usage
 
-Start the server running `go run ./main.go` or use the docker container.
+Start the server running `go run ./cmd/api/main.go` or use the docker container.
 
 Make a request with the desired URL to short. Example using `google.com`:
 

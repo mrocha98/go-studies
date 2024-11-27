@@ -25,7 +25,7 @@ ARG TARGETARCH
 # source code into the container.
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
-    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/server .
+    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/server ./cmd/api
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 # The example below uses the alpine image as the foundation for running the app.
 # By specifying the "latest" tag, it will also use whatever happens to be the
 # most recent version of that image when you build your Dockerfile. If
-# reproducability is important, consider using a versioned tag
+# reproducibility is important, consider using a versioned tag
 # (e.g., alpine:3.17.2) or SHA (e.g., alpine@sha256:c41ab5c992deb4fe7e5da09f67a8804a46bd0592bfdf0b1847dde0e0889d2bff).
 FROM alpine:latest AS final
 

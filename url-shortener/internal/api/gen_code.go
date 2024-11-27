@@ -1,10 +1,12 @@
 package api
 
-import "math/rand/v2"
+import (
+	"math/rand/v2"
+)
 
 const charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-func GenerateRandomString() string {
+func genCode() string {
 	const n = 8
 	charsetLen := len(charset)
 	bytes := make([]byte, n)

@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -17,14 +16,14 @@ type response struct {
 	Error string    `json:"error,omitempty"`
 }
 
-func (response) WithData(data any) response {
+func makeResponseWithData(data any) response {
 	return response{
 		Data: data,
 		Date: time.Now(),
 	}
 }
 
-func (response) WithError(error string) response {
+func makeResponseWithError(error string) response {
 	return response{
 		Error: error,
 		Date:  time.Now(),
@@ -63,18 +62,18 @@ func handleV1CreateUrl(db map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body handleV1CreateUrlBody
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			sendJSON(w, response{}.WithError("Invalid body"), http.StatusBadRequest)
+			sendJSON(w, makeResponseWithError("Invalid body"), http.StatusBadRequest)
 			return
 		}
 
 		if _, err := url.Parse(body.URL); err != nil {
-			sendJSON(w, response{}.WithError("Invalid URL"), http.StatusBadRequest)
+			sendJSON(w, makeResponseWithError("Invalid URL"), http.StatusBadRequest)
 			return
 		}
 
-		code := GenerateRandomString()
+		code := genCode()
 		db[code] = body.URL
-		sendJSON(w, response{}.WithData(handleV1CreateUrlResponse{Code: code}), http.StatusCreated)
+		sendJSON(w, makeResponseWithData(handleV1CreateUrlResponse{Code: code}), http.StatusCreated)
 	}
 }
 
@@ -83,27 +82,10 @@ func handleRootGetUrlByCode(db map[string]string) http.HandlerFunc {
 		code := chi.URLParam(r, "code")
 		url, ok := db[code]
 		if !ok {
-			sendJSON(w, response{}.WithError("URL not found"), http.StatusNotFound)
+			sendJSON(w, makeResponseWithError("URL not found"), http.StatusNotFound)
 			return
 		}
 
 		http.Redirect(w, r, url, http.StatusPermanentRedirect)
-	}
-}
-
-func sendJSON(w http.ResponseWriter, response response, status int) {
-	w.Header().Set("Content-Type", "application/json")
-
-	data, err := json.Marshal(response)
-	if err != nil {
-		slog.Error("Failed to marshal json", "error", err)
-		sendJSON(w, response.WithError("something went wrong"), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(status)
-	if _, err := w.Write(data); err != nil {
-		slog.Error("Failed to write response to client", "error", err)
-		return
 	}
 }
