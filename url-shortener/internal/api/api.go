@@ -1,9 +1,7 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -30,14 +28,6 @@ func makeResponseWithError(error string) response {
 	}
 }
 
-type handleV1CreateUrlBody struct {
-	URL string `json:"url"`
-}
-
-type handleV1CreateUrlResponse struct {
-	Code string `json:"code"`
-}
-
 func NewHandler(db map[string]string) http.Handler {
 	r := chi.NewMux()
 
@@ -48,44 +38,12 @@ func NewHandler(db map[string]string) http.Handler {
 		middleware.Recoverer,
 	)
 
-	r.Get("/{code}", handleRootGetUrlByCode(db))
-	r.Route("/v1", func(r chi.Router) {
-		r.Route("/urls", func(r chi.Router) {
-			r.Post("/", handleV1CreateUrl(db))
+	r.Route("/api", func(r chi.Router) {
+		r.Route("/url", func(r chi.Router) {
+			r.Post("/shorten", handleShortenUrl(db))
+			r.Get("/{code}", handleGetShortenedUrl(db))
 		})
 	})
 
 	return r
-}
-
-func handleV1CreateUrl(db map[string]string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var body handleV1CreateUrlBody
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			sendJSON(w, makeResponseWithError("Invalid body"), http.StatusBadRequest)
-			return
-		}
-
-		if _, err := url.Parse(body.URL); err != nil {
-			sendJSON(w, makeResponseWithError("Invalid URL"), http.StatusBadRequest)
-			return
-		}
-
-		code := genCode()
-		db[code] = body.URL
-		sendJSON(w, makeResponseWithData(handleV1CreateUrlResponse{Code: code}), http.StatusCreated)
-	}
-}
-
-func handleRootGetUrlByCode(db map[string]string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		code := chi.URLParam(r, "code")
-		url, ok := db[code]
-		if !ok {
-			sendJSON(w, makeResponseWithError("URL not found"), http.StatusNotFound)
-			return
-		}
-
-		http.Redirect(w, r, url, http.StatusPermanentRedirect)
-	}
 }
