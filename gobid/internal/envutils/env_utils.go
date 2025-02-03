@@ -3,6 +3,7 @@ package envutils
 import "os"
 
 type Env interface {
+	Mode() string
 	APIHost() string
 	APIPort() string
 	DBHost() string
@@ -11,12 +12,17 @@ type Env interface {
 	DBUser() string
 	DBPassword() string
 	PasswordPepper() string
+	CSRFKey() string
 }
 
 type OSEnv struct{}
 
 func NewOSEnv() Env {
 	return OSEnv{}
+}
+
+func (env OSEnv) Mode() string {
+	return os.Getenv("GOBID_MODE")
 }
 
 func (env OSEnv) APIHost() string {
@@ -49,4 +55,8 @@ func (env OSEnv) DBPassword() string {
 
 func (env OSEnv) PasswordPepper() string {
 	return os.Getenv("GOBID_PASSWORD_PEPPER")
+}
+
+func (env OSEnv) CSRFKey() string {
+	return os.Getenv("GOBID_CSRF_KEY")
 }

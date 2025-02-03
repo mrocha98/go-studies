@@ -57,6 +57,7 @@ func makeSessions(pool *pgxpool.Pool) *scs.SessionManager {
 func makeApi(pool *pgxpool.Pool) api.Api {
 	api := api.Api{
 		Router:      *chi.NewMux(),
+		Env:         envutils.NewOSEnv(),
 		UserService: services.NewUserService(pool),
 		Sessions:    makeSessions(pool),
 	}
