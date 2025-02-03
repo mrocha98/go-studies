@@ -62,7 +62,7 @@ func (ph Argon2PasswordHasher) Hash(password string) ([]byte, []byte, error) {
 
 func (ph Argon2PasswordHasher) Compare(hashed, password, salt []byte) error {
 	pepper := ph.env.PasswordPepper()
-	passwordWithPepper := []byte(hex.EncodeToString(password) + pepper)
+	passwordWithPepper := append(password, []byte(pepper)...)
 
 	hash := argon2.IDKey(
 		passwordWithPepper, salt,
