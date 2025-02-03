@@ -1,0 +1,43 @@
+ARG GO_VERSION=1.23.4
+
+FROM golang:${GO_VERSION}-bookworm AS build
+RUN go install github.com/air-verse/air@latest
+RUN go install github.com/jackc/tern/v2@latest
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+FROM golang:${GO_VERSION}-bookworm AS runner
+# Create non-root user
+RUN useradd -m -u 1000 gobid
+
+# declare envs
+# API
+ENV GOBID_API_PORT=8080
+ENV GOBID_API_HOST=0.0.0.0
+# DB
+ENV GOBID_DATABASE_HOST=
+ENV GOBID_DATABASE_PORT=
+ENV GOBID_DATABASE_NAME=
+ENV GOBID_DATABASE_USER=
+ENV GOBID_DATABASE_PASSWORD=
+# SECURITY
+ENV GOBID_PASSWORD_PEPPER=21cc28409729565fc1a4d2dd92db269f
+
+COPY --from=build /go/bin/air /usr/local/bin/air
+COPY --from=build /go/bin/tern /usr/local/bin/tern
+COPY --from=build /go/bin/sqlc /usr/local/bin/sqlc
+WORKDIR /app
+COPY --from=build /app .
+
+# Change ownership of the app directory
+RUN chown -R gobid:gobid /app
+
+# Switch to non-root user
+USER gobid
+
+EXPOSE ${GOBID_API_PORT}
+
+CMD ["air"]

@@ -1,0 +1,68 @@
+services:
+  api:
+    container_name: gobid-api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - db
+    environment:
+      GOBID_DATABASE_HOST: db
+      GOBID_DATABASE_PORT: 5432
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    tmpfs:
+      - /app/tmp:exec,mode=777
+    ports:
+      - ${GOBID_API_PORT:-8016}:8016
+    networks:
+      - gobid
+    logging:
+      driver: local
+
+  db:
+    container_name: gobid-postgresql
+    image: bitnami/postgresql:17.2.0
+    ports:
+      - ${GOBID_DATABASE_PORT:-5432}:5432
+    environment:
+      POSTGRESQL_USERNAME: ${GOBID_DATABASE_USER}
+      POSTGRESQL_PASSWORD: ${GOBID_DATABASE_PASSWORD}
+      POSTGRESQL_DATABASE: ${GOBID_DATABASE_NAME}
+    env_file:
+      - .env
+    volumes:
+      - db:/bitnami/postgresql
+    networks:
+      - gobid
+    logging:
+      driver: none
+
+  pgadmin:
+    container_name: gobid-pgadmin
+    image: dpage/pgadmin4:2024-08-20-2
+    depends_on:
+      - db
+    ports:
+      - 8081:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@email.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    networks:
+      - gobid
+    logging:
+      driver: none
+
+volumes:
+  db:
+    driver: local
+  pgadmin:
+    driver: local
+
+networks:
+  gobid:
+    driver: bridge

@@ -1,0 +1,3 @@
+[build]
+  bin = "./bin/api"
+  cmd = "go build -o ./bin/api ./cmd/api"
