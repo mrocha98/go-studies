@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mrocha98/go-studies/gobid/internal/cryptoutils"
@@ -17,7 +18,10 @@ type UserService struct {
 	passwordHasher cryptoutils.PasswordHasher
 }
 
-var ErrDuplicatedUserNameOrEmail = errors.New("userName or email already exists")
+var (
+	ErrDuplicatedUserNameOrEmail = errors.New("userName or email already exists")
+	ErrInvalidCredentials        = errors.New("invalid credentials")
+)
 
 func NewUserService(pool *pgxpool.Pool) UserService {
 	return UserService{
@@ -53,4 +57,24 @@ func (us *UserService) CreateUser(
 	}
 
 	return id, nil
+}
+
+func (us *UserService) AuthenticateUser(ctx context.Context, email, password string) (uuid.UUID, error) {
+	user, err := us.queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return uuid.UUID{}, ErrInvalidCredentials
+		}
+		return uuid.UUID{}, err
+	}
+
+	if err := us.passwordHasher.Compare(
+		user.PasswordHash, []byte(password), user.PasswordSalt); err != nil {
+		if errors.Is(err, cryptoutils.ErrMismatchedHashAndPassword) {
+			return uuid.UUID{}, ErrInvalidCredentials
+		}
+		return uuid.UUID{}, err
+	}
+
+	return user.ID, nil
 }

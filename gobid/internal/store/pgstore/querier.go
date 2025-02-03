@@ -17,6 +17,13 @@ type Querier interface {
 	//  VALUES ($1, $2, $3, $4, $5)
 	//  RETURNING id
 	CreateUser(ctx context.Context, arg CreateUserParams) (uuid.UUID, error)
+	//GetUserByEmail
+	//
+	//  SELECT
+	//  	id, user_name, password_hash, password_salt, email, bio, created_at, updated_at
+	//  FROM users
+	//  WHERE email = $1
+	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	//GetUserById
 	//
 	//  SELECT
