@@ -8,8 +8,9 @@ import (
 )
 
 type Api struct {
-	Router      chi.Mux
-	Env         envutils.Env
-	UserService services.UserService
-	Sessions    *scs.SessionManager
+	Router         chi.Mux
+	Env            envutils.Env
+	Sessions       *scs.SessionManager
+	UserService    services.UserService
+	ProductService services.ProductService
 }
